@@ -1,8 +1,4 @@
 ﻿--@'C:\OneDrive\Studia\PK\Bazy danych\db_install.sql'
--- Marek Lewiński
--- st12k1k2_LEWINSKI_PAWEL
--- ora43cP8Pg8yc
-
 ------------------
 --KASOWANIE TABEL;
 ------------------
