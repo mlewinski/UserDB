@@ -1,4 +1,4 @@
-@'E:\Bazy danych\lab5b.sql'
+--@'E:\Bazy danych\lab5b.sql'
 
 CLEAR SCREEN;
 SET LINESIZE 230;
