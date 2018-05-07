@@ -151,7 +151,7 @@ PROMPT ;
 CREATE TABLE GROUPS
 (
 	GRO_ID	number(9)	NOT NULL,
-	GRO_NAME	varchar2(30)	NOT NULL,
+	GRO_NAME	varchar2(60)	NOT NULL,
 	GRO_DESCRIPTION	varchar2(127)
 );
 --TABLSPACE STUDENT_DATA
@@ -762,6 +762,9 @@ INSERT INTO NOTIFICATIONS(NOT_CONTENT, NOT_DATE, USE_ID, CAT_ID) VALUES ('Login 
 INSERT INTO GROUPS(GRO_NAME, GRO_DESCRIPTION) VALUES ('Users', 'Regular users');
 INSERT INTO GROUPS(GRO_NAME, GRO_DESCRIPTION) VALUES ('Research project 1', 'First research team');
 
+INSERT INTO XXX_GROUPS(USE_ID, GRO_ID) VALUES(1,2);
+INSERT INTO XXX_GROUPS(USE_ID, GRO_ID) VALUES(2,2);
+
 INSERT INTO YYY_ROLES(USE_ID, ROL_ID) VALUES (1,2);
 INSERT INTO YYY_ROLES(USE_ID, ROL_ID) VALUES (2,3);
 
@@ -791,6 +794,67 @@ CREATE OR REPLACE VIEW V_USERNAMES_ACL_COUNT AS
 			GROUP BY USE_ID
 		) X, USERS U
 		WHERE U.USE_ID=X.USE_ID;
+		
+select * from V_USERNAMES_ACL_COUNT;
+/*
+Imię użytkownika        COUNTER
+-------------------- ----------
+Tomasz                        3
+Piotr                         3
+Janusz                        3
+*/
+
+CREATE OR REPLACE VIEW V_USERS_RES_ACL AS
+	SELECT U.USE_NAME, U.USE_EMAIL, X.RES_URI, X.ACC_CHMOD
+	FROM (
+		SELECT R.RES_URI, A.ACC_CHMOD, A.USE_ID
+			FROM RESOURCES R, ACCESS_CONTROL A
+		WHERE R.RES_ID = A.RES_ID
+	) X, USERS U
+	WHERE U.USE_ID = X.USE_ID;
+
+	
+/*
+Imię użytkownika     E-mail               Zasób                Pra
+-------------------- -------------------- -------------------- ---
+Tomasz               tomasz@janusze.pl    192.168.1.1:8090     R--
+Piotr                piotr@nowaki.pl      192.168.1.1:8090     R--
+Janusz               janusz@janusze.pl    192.168.1.1:8090     RWX
+Tomasz               tomasz@janusze.pl    http:/google.pl/file RWX
+                                          s
+
+Piotr                piotr@nowaki.pl      http:/google.pl/file RW-
+                                          s
+
+Janusz               janusz@janusze.pl    http:/google.pl/file RWX
+                                          s
+
+Imię użytkownika     E-mail               Zasób                Pra
+-------------------- -------------------- -------------------- ---
+
+Tomasz               tomasz@janusze.pl    http:/onet.pl/index. RWX
+                                          html
+
+Piotr                piotr@nowaki.pl      http:/onet.pl/index. R--
+                                          html
+
+Janusz               janusz@janusze.pl    http:/onet.pl/index. RWX
+                                          html
+*/
+
+CREATE OR REPLACE VIEW V_USERS_GROUPS AS
+		SELECT U.USE_NAME, U.USE_NICKNAME, U.USE_SURNAME, U.USE_EMAIL, U.USE_PHONE, G.GRO_NAME
+		FROM USERS U, GROUPS G, XXX_GROUPS X
+		WHERE U.USE_ID=X.USE_ID AND X.GRO_ID=G.GRO_ID;
+		
+SELECT * FROM V_USERS_GROUPS;
+/*
+Imię użytkownika     USE_NICKNAME         USE_SURNAME                    E-mail               USE_PHONE        GRO_NAME
+-------------------- -------------------- ------------------------------ -------------------- ---------------- -------------------
+Janusz               Janusz               Kowalski                       janusz@janusze.pl    22323141         Research project 1
+Piotr                pnowak               Nowak                          piotr@nowaki.pl      0048191234       Research project 1
+Piotr                pnowak               Nowak                          piotr@nowaki.pl      0048191234       Users
+*/
 
 -- INDEX -------------------------------------------------------
 DROP INDEX IX_USR_NAME;
@@ -806,10 +870,10 @@ CREATE INDEX IX_ACC_CHMOD
 		STORAGE (INITIAL 10k NEXT 10k)
 		TABLESPACE STUDENT_INDEX;
 
-COLUMN U.USE_NAME HEADING 'Imię użytkownika' FORMAT A30
-COLUMN U.USE_EMAIL HEADING 'E-mail' FORMAT A50
-COLUMN X.RES_URI HEADING 'Zasób' FORMAT A255
-COLUMN X.ACC_CHMOD HEADING 'Prawa' FORMAT A3
+COLUMN USE_NAME HEADING 'Imię użytkownika' FORMAT A20
+COLUMN USE_EMAIL HEADING 'E-mail' FORMAT A20
+COLUMN RES_URI HEADING 'Zasób' FORMAT A20
+COLUMN ACC_CHMOD HEADING 'Prawa' FORMAT A3
 SELECT U.USE_NAME, U.USE_EMAIL, X.RES_URI, X.ACC_CHMOD
 	FROM (
 		SELECT R.RES_URI, A.ACC_CHMOD, A.USE_ID
@@ -817,7 +881,33 @@ SELECT U.USE_NAME, U.USE_EMAIL, X.RES_URI, X.ACC_CHMOD
 		WHERE R.RES_ID = A.RES_ID
 	) X, USERS U
 WHERE U.USE_ID = X.USE_ID;
+/*
+Imię użytkownika     E-mail               Zasób                Pra
+-------------------- -------------------- -------------------- ---
+Tomasz               tomasz@janusze.pl    192.168.1.1:8090     R--
+Piotr                piotr@nowaki.pl      192.168.1.1:8090     R--
+Janusz               janusz@janusze.pl    192.168.1.1:8090     RWX
+Tomasz               tomasz@janusze.pl    http:/google.pl/file RWX
+                                          s
 
+Piotr                piotr@nowaki.pl      http:/google.pl/file RW-
+                                          s
+
+Janusz               janusz@janusze.pl    http:/google.pl/file RWX
+                                          s
+
+Imię użytkownika     E-mail               Zasób                Pra
+-------------------- -------------------- -------------------- ---
+
+Tomasz               tomasz@janusze.pl    http:/onet.pl/index. RWX
+                                          html
+
+Piotr                piotr@nowaki.pl      http:/onet.pl/index. R--
+                                          html
+
+Janusz               janusz@janusze.pl    http:/onet.pl/index. RWX
+                                          html
+*/
 
 -- GENERATORY ----------------------------------------------------------
 DROP SEQUENCE SEQ_USR_GENERATOR;
@@ -843,6 +933,21 @@ CREATE or REPLACE PROCEDURE USE_insert(ile IN number)
 BEGIN
 	USE_insert(10);
 END;
+/*
+USE_ID USE_NICKNAME         Imię użytkownika     USE_SURNAME                    E-mail              
+------ -------------------- -------------------- ------------------------------ --------------------
+     1 Janusz               Janusz               Kowalski                       janusz@janusze.pl   
+     2 pnowak               Piotr                Nowak                          piotr@nowaki.pl     
+     3 tomex                Tomasz               Kowalski                       tomasz@janusze.pl   
+     4 JK101                Janusz               Kowalski101                    janusz101@abc.pl    
+     5 JK102                Janusz               Kowalski102                    janusz102@abc.pl    
+     6 JK103                Janusz               Kowalski103                    janusz103@abc.pl    
+     7 JK104                Janusz               Kowalski104                    janusz104@abc.pl    
+     8 JK105                Janusz               Kowalski105                    janusz105@abc.pl    
+     9 JK106                Janusz               Kowalski106                    janusz106@abc.pl    
+    10 JK107                Janusz               Kowalski107                    janusz107@abc.pl    
+    11 JK108                Janusz               Kowalski108                    janusz108@abc.pl    
+*/
 
 DROP SEQUENCE SEQ_GRO_GENERATOR;
 CREATE SEQUENCE SEQ_GRO_GENERATOR INCREMENT BY 1 START WITH 1 MAXVALUE 999999 MINVALUE 1;
@@ -867,5 +972,17 @@ CREATE or REPLACE PROCEDURE GRO_insert(ile IN number)
 BEGIN
 	GRO_insert(10);
 END;
+/*
+ GRO_ID GRO_NAME                       GRO_DESCRIPTION
+------- ------------------------------ ----------------------------------------------
+      1 Users                          Regular users
+      2 Research project 1             First research team
+      3 Users101                       Grupa użytkowników numer 101 o niestandardowej
+      4 Users102                       Grupa użytkowników numer 102 o niestandardowej
+      5 Users103                       Grupa użytkowników numer 103 o niestandardowej
+      6 Users104                       Grupa użytkowników numer 104 o niestandardowej
+      7 Users105                       Grupa użytkowników numer 105 o niestandardowej
+	  ...
+*/
 
 commit;
