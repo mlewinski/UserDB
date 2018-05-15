@@ -5,6 +5,7 @@
 
 CLEAR SCREEN;
 SET LINESIZE 230;
+set serveroutput on;
 alter session set nls_date_format="YYYY-MM-DD";
 PROMPT ;
 PROMPT logowanie jako STUDENT;
