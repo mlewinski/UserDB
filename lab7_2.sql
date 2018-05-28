@@ -61,3 +61,11 @@ create or replace procedure
 					dbms_output.put_line('Kursor nie zostal znaleziony');
 		end;
 /
+/*
+    NOT_ID Content                                                               USE_ID
+---------- --------------------------------------------------------------------- ----------
+         1 Login from untrusted platform                                                  1
+        21 User's nickname is too short : to1                                            41
+        22 User's nickname is too short : to1, user-role : 4-Researchers                 41
+        23 User's nickname is too short : to2, user-role : 4-Researchers                 42
+*/
