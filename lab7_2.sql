@@ -1,3 +1,9 @@
+
+CLEAR SCREEN;
+SET LINESIZE 230;
+
+alter session set nls_date_format="YYYY-MM-DD";
+
 create or replace procedure
 	pUSER_Validate_Length
 	is
