@@ -83,9 +83,9 @@ select LOG_ID, x.* from LOGS, TABLE(LOG_AFFECTED_USERS) x;
     LOG_ID COLUMN_VALUE
 ---------- --------------------
          1 ADMIN
-         1 JAN2
-         1 SYSTEM
+         1 JAN1
 */
+
 update LOGS
 set 
 	LOG_OPTIONS = V_OPTIONS('READABLE', 'EDITABLE', NULL),
